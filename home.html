@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#tableheader {
+	outline: thin solid black;
+}
+
+td {
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+input {
+	border: thin solid black;
+}
+
+a:link {
+	color: #666666;
+}
+
+a:visited {
+	color: #444444;
+}
+
+a:hover {
+	color: blue;
+}
+
+.linkcheck {
+	padding: 0;
+	float: right;
+}
+</style>
+<meta charset="ISO-8859-1">
+<title>Home</title>
+<script src="javascript.js"></script>
+</head>
+<body>
+
+	<table id="maintable">
+		<!-- 	Starting the Table-->
+		<tr id="tableheader">
+			<td><p>Class</p></td>
+			<td><input id="addClass" type="button" onclick="addClass()" value="Add Class" /></td>
+
+			<td><p>Links</p></td>
+			<td><input id="addLink" type="button" onclick="addLink()" value="Add Link" /></td>
+		</tr>
+
+		<!-- 		Standard first class row -->
+		<tr id="row1">
+			<td><p id="p1">Generic Class</p></td>
+			<td><input class="linkcheck" type="checkbox" /></td>
+			<td><a id="l11" href="http://web.engr.illinois.edu/~trueb2/index.html">Generic Link</a></td>
+		</tr>
+	</table>
+	
+	<input type="button" onclick="show()" value="Show Classes" />
+	
+</body>
