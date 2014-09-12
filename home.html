@@ -36,16 +36,16 @@ a:hover {
 <title>Home</title>
 <script src="homescript.js"></script>
 </head>
-<body>
+<body id="body" onload="startup()">
 
 	<table id="maintable">
 		<!-- 	Starting the Table-->
 		<tr id="tableheader">
 			<td><p>Class</p></td>
-			<td><input id="addClass" type="button" onclick="addClass()" value="Add Class" /></td>
+			<td><input id="addClass" type="button" onclick="addClass('')" value="Add Class" /></td>
 
 			<td><p>Links</p></td>
-			<td><input id="addLink" type="button" onclick="addLink()" value="Add Link" /></td>
+			<td><input id="addLink" type="button" onclick="addLink('','')" value="Add Link" /></td>
 		</tr>
 
 		<!-- 		Standard first class row -->

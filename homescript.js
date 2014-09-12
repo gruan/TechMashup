@@ -4,23 +4,88 @@
  * JavaScript for class and link
  *  entry and table manipulation
  */
-var extraLinksAdded = 0;
+
 var c0 = ["Generic Class", "Generic Link"];
 var classes = [c0]; //holds arrays of class info [[className0, link0, link1], [className1, link0, link1, etc.], etc.]
+
+
+/*
+* when the page loads, this function is called
+* it checks for any previously stored data
+* if there is previously stored data, the generic
+* first row is removed, then the classes array is 
+* looped through to restore the appearance from
+* the user's last session
+*/
+function startup(){
+	var cookieish = localStorage.getItem("classes"); //like, but not a cookie
+	localStorage.removeItem("classes"); //used to delete stored data
+
+	if(cookieish == null){
+		return; //the user has not visited before from this browser
+	}
+
+	//reassign classes its value from previous sessions
+	classes = JSON.parse(cookieish);
+
+	//remove initial row
+	var tr = document.getElementById("row1")
+	tr.parentNode.removeChild(tr);
+
+	//repopulate the table
+	var count = classes.length;
+	alert("classes.length = " + count);
+	for(var i = 0; i < count; i++){
+		//add each class and its links to the table
+		var c = classes[i][0];
+		addClass(c); //add class
+		var linkcount = classes[i].length - 1;
+		for(var j = 1; j <= linkcount; j++){
+			addLink(JSON.stringify(classes[i][0]), JSON.stringify(classes[i][j])); //add link
+		}
+	}
+}
+
+/*
+* saves a cookie containg classes for easy page reconstruction on each visit
+* should be called after each time classes is updated
+*/
+function save(){
+	var classesString = JSON.stringify(classes);
+	alert(classesString);
+ 	// createCookie("cookie", "test", 30);
+ 	localStorage.setItem("classes", classesString);
+	alert("Attempted to save");
+}
 
 /*
 * takes a link from addLink (<a href="http://www.website.com")
 * assigns the href of the link and the name that the user sees when
 * viewing the page
 */
-function linkIt(link1, classIndex, linkIndex) {
-	var link = prompt("What is a website that your class uses. The more exact the better, so it is recommended that you go to the actual page you visit most often and copy the address.","");
-	if(link == null){ //tells add link to return before making extra rows
-		return 0;
+function linkIt(link1, classIndex, linkIndex, link) {
+	var haveLinkName = 1;
+
+	if(link === ""){ //this is not a page page reload
+		link = prompt("What is a website that your class uses. The more exact the better, so it is recommended that you go to the actual page you visit most often and copy the address.","");
+		if(link == null){ //tells add link to return before making extra rows
+			return 0;
+		}
+		haveLinkName = 0;
 	}
-	alert(link); //for some reason this href is null every now and then when there should be text
+
 	link1.href = link;
-	var linkName = prompt("What would you like to call this link?");
+
+	var linkName;
+
+	//if we do not already have the preferred name of the link ask
+	if(haveLinkName == 0){
+		linkName = prompt("What would you like to call this link?");
+		localStorage.setItem(link, linkName);
+	} else { //acquire the link name from storage
+		linkName = localStorage.getItem(link);
+	}
+
 	if (linkName == null) {
 		link1.innerHTML = link;
 	} else {
@@ -40,8 +105,13 @@ function linkIt(link1, classIndex, linkIndex) {
 /*
 * adds a class, updating the page and the array 
 */
-function addClass() {
-	var className = prompt("What is the name of the class you are trying to add?","Ex. RHET 105");
+function addClass(className) {
+	var alreadyAdded = 1;
+	if(className === ""){
+		className = prompt("What is the name of the class you are trying to add?","Ex. RHET 105");
+		alreadyAdded = 0;
+	}
+
 	var class1 = classes[0][0];
 
 	if(className == null){
@@ -80,31 +150,39 @@ function addClass() {
 		var link = document.createElement("a");
 		link.href = "http://www.google.com";
 		link.innerHTML = "Click \"Add Link\"";
-		link.id = "l" + (classes.length+1) + "1"; //l11 or l21 or l31 ... first number increments by number of classes second increments by number of links in that class
+		link.id = "l" + (classes.length) + "1"; //l11 or l21 or l31 ... first number increments by number of classes second increments by number of links in that class
 		cell3.appendChild(link);
 		
 		//keep classes array updated
-		var newClass = [className, "Click \"Add Link\""];
-		classes.push(newClass);
+		if(alreadyAdded == 0){
+			var newClass = [className, "Click \"Add Link\""];
+			classes.push(newClass);
+		}
 	}
+	save(); //update the cookie for the next time the user logs on
 }
 
-function addLink() {
+function addLink(className, actualLink) {
 	// 	alert("You are trying to add a link");
-	var className = prompt("To which class do you want to add another link?","Ex. RHET 105");
-
+	if(actualLink == "" || className == ""){ //not called on page load
+		className = prompt("To which class do you want to add another link?","Ex. RHET 105");
+	}
+	
 	if(className == null){ //no user input
 		return;
 	}
 
 	for (var i = 0; i < classes.length; i++) {
 		var name = classes[i][0]; //get the class name from the array
-		if (name === className) { //this is the class to change
+		var name = "\""+name+"\"";
+		alert(name + " " + className);
+		if (name === className) {
 			var l1 = classes[i][1]; //check first link to see if it has been assigned
 			var link1 = document.getElementById("l"+(i+1)+"1");
 
 			if (l1 === "Click \"Add Link\"" || l1 === "Generic Link") { //prompt for Link Name and hyperlink
-				var keepGoing = linkIt(link1, i, 1);
+				alert("linking generic link "+actualLink);
+				var keepGoing = linkIt(link1, i, 1, actualLink);
 
 				if(keepGoing === 0){
 					return;
@@ -134,13 +212,16 @@ function addLink() {
 				checkBox.style.cssFloat = "right";
 				cell2.appendChild(checkBox);
 
+				alert("linking link in new row " + actualLink);
 				var link = document.createElement("a");
-				linkIt(link, i, classes[i].length); //find out after user input
+				linkIt(link, i, classes[i].length, actualLink); //find out after user input
 				link.id = "l" + (i+1) + "" + classes[i].length;
 				cell3.appendChild(link);
 			}
 		}
 	}
+
+	save(); //update the cookie for the next time that the user logs on
 }
 
 /*
