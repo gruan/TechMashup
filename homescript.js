@@ -8,8 +8,9 @@
 var c0 = ["Generic Class", "Generic Link"];
 var classes = [c0]; //holds arrays of class info [[className0, link0, link1], [className1, link0, link1, etc.], etc.]
 var scratch = 2;
+var pageLoadinLinkCounter = 1;
 var classCount = 1;
-
+var loading = 1; //the page is not done loading while 1
 
 /*
 * when the page loads, this function is called
@@ -24,6 +25,7 @@ function startup(){
 	// localStorage.clear(); //used to delete stored data
 
 	if(cookieish == null){
+		loading = 0;
 		return; //the user has not visited before from this browser
 	}
 
@@ -50,8 +52,10 @@ function startup(){
 			cname = clean(cname);
 			// alert("cname is " + cname);
 			addLink(cname, actualLink); //add link
+			pageLoadinLinkCounter = 1;
 		}
 	}
+	loading = 0;
 }
 
 /*
@@ -59,8 +63,11 @@ function startup(){
 * should be called after each time classes is updated
 */
 function save(){
+	if(loading == 1) {
+		return;
+	}
 	var classesString = JSON.stringify(classes);
-	// alert(classesString);
+	alert(classesString);
  	// createCookie("cookie", "test", 30);
  	localStorage.setItem("classes", classesString);
 	// alert("Attempted to save");
@@ -113,7 +120,7 @@ function addClass(className) {
 		cell2.appendChild(checkBox);
 
 		var link = document.createElement("a");
-		link.href = "http://www.google.com";
+		link.href = "abcdehijklmnopqrstuvwxyz";
 		link.innerHTML = "Click \"Add Link\"";
 		// alert("Class count " +classCount);
 		link.id = "l" + classCount + "1"; //l11 or l21 or l31 ... first number increments by number of classes second increments by number of links in that class
@@ -149,7 +156,8 @@ function addLink(className, actualLink) {
 			var l1 = classes[i][1]; //check first link to see if it has been assigned
 			var link1 = document.getElementById("l"+(i+1)+"1");
 			// alert("before logic link1.innerHTML = " + link1.innerHTML + " and l1 = " + l1);
-			if (l1 === "Click \"Add Link\"" || l1 === "Generic Link" || link1.innerHTML != l1) { //prompt for Link Name and hyperlink
+			// if (l1 === "Click \"Add Link\"" || l1 === "Generic Link" || link1.innerHTML != l1) { //prompt for Link Name and hyperlink
+				if (l1 === "Click \"Add Link\"" || l1 === "Generic Link" || link1.href.substring(0, 5) != "http:") { //prompt for Link Name and hyperlink
 				// alert("linking generic link "+actualLink);
 				var keepGoing = linkIt(link1, i, 1, actualLink);
 
@@ -159,24 +167,25 @@ function addLink(className, actualLink) {
 			} else { //find out which number link we need to add and prompt for link name and hyperlink
 				//any additional links will require additional rows to be added to the table beneath a class
 				//row will be inserted beneath last link already present in the class's group
-				var index = 0;
-				for(var j = 0; j <= i; j++){
-					index += classes[j].length;
-				}
 				var table = document.getElementById("maintable");
-				var row = table.insertRow(index-1);
-				row.id = "row" + (i+1) + "" + classes[i].length; //may need to change if extra links are taking up more rows
+				var t = 1;
+				for(var z = 0; z < i; z++){
+					t += classes[z].length;
+				}
+				t += classes[i].length - 1; //-1 for each not displayed
+
+				var row = table.insertRow(t);
+
+				row.id = "row" + scratch + "" + classes[i].length; //may need to change if extra links are taking up more rows
 
 				//insert the new cells
 				var cell1 = row.insertCell(0);
 				var cell2 = row.insertCell(1);
 				var cell3 = row.insertCell(2);
 
-				var prevRows = index;
-
 				//check box and link 
 				var checkBox = document.createElement("input");
-				checkBox.id = "cb" + prevRows;
+				checkBox.id = "cb" + t;
 				checkBox.type = "checkbox";
 				checkBox.style.cssFloat = "right";
 				cell2.appendChild(checkBox);
