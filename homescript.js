@@ -19,7 +19,7 @@ var classes = [c0]; //holds arrays of class info [[className0, link0, link1], [c
 */
 function startup(){
 	var cookieish = localStorage.getItem("classes"); //like, but not a cookie
-	localStorage.removeItem("classes"); //used to delete stored data
+	localStorage.clear(); //used to delete stored data
 
 	if(cookieish == null){
 		return; //the user has not visited before from this browser
