@@ -10,6 +10,7 @@ var classes = [c0]; //holds arrays of class info [[className0, link0, link1], [c
 var d0 = [0, 0];
 // var displayedClasses = [d0];
 var loading = 1;
+var loadingCount = 1; 
 
 /*
 * when the page loads, this function is called
@@ -31,17 +32,8 @@ function startup(){
 	classes = JSON.parse(cookieish);
 
 	//remove initial row
-	var tr = document.getElementById("row1")
+	var tr = document.getElementById("row1");
 	tr.parentNode.removeChild(tr);
-
-	//track displayed elements
-	// for(var i = 1; i < classes.length; i++){
-	// 	var clss = [];
-	// 	for(var j = 0; j < classes[i].length; i++){
-	// 		clss.push(0);
-	// 	}
-	// 	displayedClasses.push(clss);
-	// }
 
 	//repopulate the table
 	populate();
@@ -65,7 +57,9 @@ function populate(){
 			var cname = JSON.stringify(classes[i][0]);
 			link = clean(link);
 			cname = clean(cname);
-			addLink(cname, link); //add link
+			if(link.substring(0,4) === "http"){
+				addLink(cname, link); //add link
+			}
 		}
 	}
 }
@@ -88,7 +82,6 @@ function addClass(className) {
 
 		//keep the classes array updated
 		classes[0][0] = className;
-		// displayed(className);
 	} else {
 		//keep classes array updated
 		if(loading == 0){
@@ -98,7 +91,12 @@ function addClass(className) {
 		//add new row
 		var table = document.getElementById("maintable");
 		var row = table.insertRow(table.rows.length);
-		row.id = "row" + (table.rows.length - 1); //may need to change if extra links are taking up more rows
+
+		if(loading == 1){
+			row.id = "row" + loadingCount;
+		} else {
+			row.id = "row" + (classes.length); //may need to change if extra links are taking up more rows
+		}
 
 		//insert the new cells
 		var cell1 = row.insertCell(0);
@@ -106,11 +104,15 @@ function addClass(className) {
 		var cell3 = row.insertCell(2);
 
 		//adding text and stuff
-		pTag(cell1, table.rows.length-1, className);
-		cbox(cell2, table.rows.length-1);
-		aLink(cell3, classes.length+"1", "abcdehijklmnopqrstuvwxyz", "Click \"Add Link\"");
+		var t = classes.length;
+		if(loading == 1){
+			t = loadingCount;
+			loadingCount = loadingCount + 1;
+		}
 
-		// displayed(className);
+		pTag(cell1, t, className);
+		cbox(cell2, t);
+		aLink(cell3, t +"1", "abcdehijklmnopqrstuvwxyz", "Click \"Add Link\"");
 	}
 	save(); //update the cookie for the next time the user logs on
 }
@@ -128,50 +130,32 @@ function addLink(className, link) {
 		return;
 	}
 
-	// var previouslyDisplayed = 0;
-	// for(var i = 0; i < displayedClasses.length; i++){
-	// 	for(var j = 0; j < displayedClasses[i].length; j++){
-	// 		if(displayedClasses[i][j] === 1){
-	// 			previouslyDisplayed += 1;
-	// 		}
-	// 	}
-	// 	if(displayedClasses[i][1] === 0){
-	// 		previouslyDisplayed += 1;
-	// 	}
-	// }
-	// previouslyDisplayed = previouslyDisplayed - displayedClasses.length; //1st one counted twice
-
 	//in order to add we need to add a new row or replace a generic link
 	for(var i = 0; i < classes.length; i++){
 		if(classes[i][0] === className){
-			if(classes[i][1] === "Click \"Add Link\"" || classes[i][1] === "Generic Link" ){
+			if(classes[i][1] === "Click \"Add Link\"" || classes[i][1] === "Generic Link" || (loading == 1 && classes[i][1] == link)){
 				//we do not need a new row change this link
 				l1 = document.getElementById("l"+(i+1)+"1", "");
 				linkIt(l1, link, i, 1);
 				save();
 				return;
 			}
+			var p = document.getElementById("p"+(i+1));
 
-			for(var j = 0; j < classes.length; j++){
-				var p = document.getElementById("p"+(j+1));
-				alert(p.innerHTML);
-				if(p.innerHTML === className){
-					//add a row here with the content in classes[i][j]
-					var table = document.getElementById("maintable");
-					var row0 = p.parentNode.parentNode;
-					var row = table.insertRow(row0.rowIndex+1);
-					// var row = $("<tr>...</tr>");
-					var cell1 = row.insertCell(0);
-					var cell2 = row.insertCell(1);
-					var cell3 = row.insertCell(2);
-					cbox(cell2, table.rows.length-1);
-					var linkElement =  aLink(cell3, (i+1)+""+(j+2), link, "Click \"Add Link\"");
-					linkIt(linkElement, link, i, j+1);
-					// $("row"+(j+1)).after(row);
-					// displayedClasses[i][j] = 1;
-					save();
-					return;
-				}
+			// alert(p.innerHTML);
+			if(p.innerHTML === className){
+				//add a row here with the content in classes[i][j]
+				var table = document.getElementById("maintable");
+				var row0 = p.parentNode.parentNode;
+				var row = table.insertRow(row0.rowIndex+1);
+				var cell1 = row.insertCell(0);
+				var cell2 = row.insertCell(1);
+				var cell3 = row.insertCell(2);
+				cbox(cell2, table.rows.length-1);
+				var linkElement =  aLink(cell3, (i+1)+""+classes[i].length, link, "Click \"Add Link\"");
+				linkIt(linkElement, link, i, classes[i].length);
+				save();
+				return;
 			}
 		}
 	}
@@ -245,7 +229,7 @@ function save(){
 function pTag(parent, id, content){
 	var table = document.getElementById("maintable");
 	var pCName = document.createElement("p");
-	pCName.id = "p" + (table.rows.length - 1); //will be different when adding new rows for links
+	pCName.id = "p" + id; //will be different when adding new rows for links
 	pCName.innerHTML = content;
 	parent.appendChild(pCName);
 	return pCName;
