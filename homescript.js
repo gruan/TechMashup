@@ -7,6 +7,7 @@
 
 var c0 = ["Generic Class", "Generic Link"];
 var classes = [c0]; //holds arrays of class info [[className0, link0, link1], [className1, link0, link1, etc.], etc.]
+var displayedClasses;
 var scratch = 2;
 var pageLoadinLinkCounter = 1;
 var classCount = 1;
@@ -35,6 +36,14 @@ function startup(){
 	//remove initial row
 	var tr = document.getElementById("row1")
 	tr.parentNode.removeChild(tr);
+
+	for(var i = 0; i < classes.length; i++){
+		var clss = [];
+		for(var j = 0; j < classes[i].length; i++){
+			clss.push(0);
+		}
+		displayedClasses[i] = clss;
+	}
 
 	//repopulate the table
 	var count = classes.length;
@@ -95,6 +104,7 @@ function addClass(className) {
 		classCount = classCount + 1;
 		//keep the classes array updated
 		classes[0][0] = className;
+		displayedClasses[0][0] = 1;
 	} else {
 		//add new row
 		var table = document.getElementById("maintable");
@@ -128,11 +138,12 @@ function addClass(className) {
 		// alert("Class count " +classCount);
 		// alert("link.id = " + link.id);
 		cell3.appendChild(link);
-		
+
 		//keep classes array updated
 		if(alreadyAdded == 0){
 			var newClass = [className, "Click \"Add Link\""];
 			classes.push(newClass);
+			displayedClasses.push([1, 0]);
 		}
 	}
 	save(); //update the cookie for the next time the user logs on
